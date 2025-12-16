@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMI Calculator – FitLife</title>
+  <link rel="stylesheet" href="public/css/style.css">
+</head>
+<body>
+
+  <!-- Navbar (matches your other pages) -->
+  <header class="main-header">
+    <div class="logo">FitLife</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="bmi.html" class="active">BMI Calculator</a>
+      <a href="tips.html">Health Tips</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+    </nav>
+  </header>
+
+  <!-- Page Header -->
+  <section class="hero-section">
+    <div class="hero-text">
+      <h1>Check Your BMI</h1>
+      <p>Enter your weight and height to calculate your Body Mass Index and see your health category.</p>
+    </div>
+  </section>
+
+  <!-- BMI Form Card -->
+  <section class="container">
+    <div class="card">
+
+      <h2>Enter Your Details</h2>
+
+      <!-- FORM: keep IDs exact for JS -->
+      <form id="bmiForm">
+
+        <div class="input-group">
+          <label for="weight">Weight (kg)</label>
+          <input type="number" id="weight" placeholder="e.g., 70" required>
+        </div>
+
+        <div class="input-group">
+          <label for="height">Height (cm)</label>
+          <input type="number" id="height" placeholder="e.g., 175" required>
+        </div>
+
+        <button type="submit" class="btn">Calculate BMI</button>
+      </form>
+
+      <!-- BMI Result -->
+      <div id="bmiResult" class="bmi-result"></div>
+
+    </div>
+  </section>
+
+  <script src="public/js/script.js" defer></script>
+</body>
+</html>

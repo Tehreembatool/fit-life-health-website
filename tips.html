@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Tips – FitLife</title>
+  <link rel="stylesheet" href="public/css/style.css">
+  <!-- SUPABASE ADD KAREN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="public/js/supabase.js"></script>
+</head>
+<body>
+
+<header class="main-header">
+  <div class="logo">FitLife</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="bmi.html">BMI Calculator</a>
+    <a href="tips.html" class="active">Health Tips</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+  </nav>
+</header>
+
+<section class="container">
+  <div class="card">
+    <h2>Get Fitness Tips by BMI</h2>
+    
+    <form id="tipsForm">
+      <div class="input-group">
+        <label for="userBmi">Enter Your BMI:</label>
+        <input type="number" step="0.1" id="userBmi" placeholder="e.g., 24.5" required>
+      </div>
+      <button type="submit" class="btn">Get Tips</button>
+    </form>
+
+    <div id="tipsResults" style="margin-top: 20px;"></div>
+  </div>
+</section>
+
+<script>
+  // Tips form handler
+  const form = document.getElementById('tipsForm');
+  const resultsDiv = document.getElementById('tipsResults');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const bmi = parseFloat(document.getElementById('userBmi').value);
+    
+    // Validation
+    if (bmi < 10 || bmi > 50) {
+      resultsDiv.innerHTML = '<p style="color:red;">Please enter a valid BMI (10-50)</p>';
+      return;
+    }
+    
+    // Show loading
+    resultsDiv.innerHTML = '<p>Loading tips...</p>';
+    
+    // Determine BMI category
+    let bmiCategory = '';
+    if (bmi < 18.5) bmiCategory = 'underweight';
+    else if (bmi < 25) bmiCategory = 'normal';
+    else if (bmi < 30) bmiCategory = 'overweight';
+    else bmiCategory = 'obese';
+    
+    try {
+      // ✅ DIRECT SUPABASE FETCH
+      const { data: tips, error } = await supabase
+        .from('health_tips')
+        .select('*')
+        .eq('bmi_category', bmiCategory);
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (!tips || tips.length === 0) {
+        resultsDiv.innerHTML = `
+          <p>No tips found for BMI category: <strong>${bmiCategory}</strong></p>
+          <p>BMI: ${bmi} (${bmiCategory})</p>
+        `;
+        return;
+      }
+      
+      // Display tips
+      resultsDiv.innerHTML = `
+        <h3>Tips for BMI: ${bmi} (${bmiCategory})</h3>
+        <div style="display: grid; gap: 15px; margin-top: 15px;">
+          ${tips.map(tip => `
+            <div class="tip-card" style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #4299e1;">
+              <h4 style="margin-top: 0; color: #2d3748;">
+                ${tip.plan_type.charAt(0).toUpperCase() + tip.plan_type.slice(1)} Plan
+              </h4>
+              <p>${tip.tip_text}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+    } catch (error) {
+      console.error('Error fetching tips:', error);
+      resultsDiv.innerHTML = `
+        <p style="color:red;">Error loading tips: ${error.message}</p>
+        <p>Check if:
+          <ul style="text-align:left;">
+            <li>Supabase connection is working</li>
+            <li>health_tips table exists</li>
+            <li>You're online</li>
+          </ul>
+        </p>
+      `;
+    }
+  });
+</script>
+
+</body>
+</html>

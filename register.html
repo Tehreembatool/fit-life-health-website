@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register – FitLife</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="public/css/style.css">
+  <!-- SUPABASE ADD KAREN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="public/js/supabase.js"></script>
+</head>
+<body>
+
+  <header class="main-header">
+    <div class="logo">FitLife</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="bmi.html">BMI Calculator</a>
+      <a href="tips.html">Health Tips</a>
+      <a href="login.html">Login</a>
+      <a href="register.html" class="active">Register</a>
+    </nav>
+  </header>
+
+  <section class="hero-section">
+    <div class="hero-text">
+      <h1>Create Your Account</h1>
+      <p>Join FitLife to calculate BMI and get personalized health tips.</p>
+    </div>
+  </section>
+
+  <section class="container">
+    <div class="card">
+      <h2>Register</h2>
+
+      <form id="registerForm">
+        <div class="input-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Enter your name" required>
+        </div>
+
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Create password (min. 6 characters)" required minlength="6">
+        </div>
+
+        <button type="submit" class="btn">Register</button>
+      </form>
+
+      <div id="msg" class="message"></div>
+
+      <p style="text-align:center; margin-top:15px;">
+        Already have an account?
+        <a href="login.html">Login here</a>
+      </p>
+    </div>
+  </section>
+
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const msgDiv = document.getElementById("msg");
+
+      // Validation
+      if (password.length < 6) {
+        msgDiv.innerHTML = '<p style="color:red;">Password must be at least 6 characters</p>';
+        return;
+      }
+
+      // Show loading
+      msgDiv.innerHTML = '<p style="color:#4299e1;">Creating account...</p>';
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              name: name,
+              created_at: new Date().toISOString()
+            }
+          }
+        });
+
+        if (error) {
+          msgDiv.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+          return;
+        }
+
+        // Success
+        if (data.user?.identities?.length === 0) {
+          msgDiv.innerHTML = `
+            <p style="color:orange;">Email already registered. Try <a href="login.html">logging in</a>.</p>
+          `;
+        } else {
+          msgDiv.innerHTML = `
+            <div style="background:#f0fff4; padding:15px; border-radius:8px;">
+              <p style="color:#38a169; margin:0;">
+                <strong>Registration successful!</strong>
+              </p>
+              <p style="margin:10px 0 0 0; color:#2d3748;">
+                Check your email (${email}) for verification link.
+                <br>You can <a href="login.html">login now</a>.
+              </p>
+            </div>
+          `;
+          
+          // Clear form
+          document.getElementById("registerForm").reset();
+        }
+        
+      } catch (err) {
+        msgDiv.innerHTML = `<p style="color:red;">Network error: ${err.message}</p>`;
+      }
+    });
+
+    // Check if already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        document.getElementById("msg").innerHTML = 
+          `<p style="color:orange;">Already logged in as ${session.user.email}. 
+          <a href="index.html">Go to Home</a></p>`;
+      }
+    });
+  </script>
+
+</body>
+</html>
